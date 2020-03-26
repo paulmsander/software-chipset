@@ -1,0 +1,56 @@
+This directory contains source code to an in-memory B-tree implementation.
+The tree can hold arbitrary keys, but duplicate keys cannot be inserted.
+
+This implementation has been placed in the public domain by its author,
+Paul Sander, to be used as you wish.  However, if you add neat new features,
+I'd appreciate having a copy sent to me at paul@sander.cupertino.ca.us .
+
+You are strongly urged to review the Makefile.  It contains a lot of stuff
+that is specific to my system, but configuring it to your needs should be
+straightforward.  The most important places to look are at the macros near
+the beginning of the file, and in the "installDocs" and "installLib" recipes.
+
+Also review the btdump.c file.  It contains additional debugging code that
+display the contents of a B-tree to the standard output device.  This file
+contains platform-specific code to format pointers.
+
+To build the library on a Unix system, invoke "make".  VMS users will need
+to translate the Makefile into a DESCRIP.MMS file.  Others will need to do
+something different, of course.  The code should compile under either an
+ANSI or a K&R compiler.  If your implementation predates the "void" type,
+you should add a typedef or macro to the .h files to alias the "char" type
+as "void".
+
+Online documentation has been provided.  It consists of source code using
+the Unix "man" macros, and also ASCII plaintext and PostScript versions
+produced by nroff and troff, respectively.  The plaintext and PostScript
+documents can be rebuilt by invoking the "make docs" command.
+
+Installation should be done by invoking other tools provided with the
+Software ChipSet that package the components up and install them in one
+pass.  For details about using these tools, please see the ../../README
+file.
+
+There is a test program that performs a very rigorous test of the B-tree
+implementation.  The program is built by invoking "make test".  It is
+also built as the result of "make all" or simply "make".  To run the test,
+invoke the command "./test | tail -1".  This should write "TEST PASSED" to
+the controlling tty.
+
+An attempt to do coverage analysis was done by hand.  To view the coverage,
+compile the library while #define'ing the COVERAGE macro and run the test
+program.  The test program's output will then contain data reflecting each
+decision point in the library.  Portions of the code not stimulated by the
+test program are noted in comments in the source code, or fall along paths
+where malloc fails (which is difficult to induce in a controlled way).  Each
+of these paths has been reviewed and appears to be correct.
+
+If you make changes to the library and discover that the heap is becoming
+corrupt, there is some heap debugging scaffolding provided in the file
+btmalloc.c .  It matches mallocs and frees, and detects when a block is
+freed twice.  This debugging tool can be added to the library by compiling
+it with the DEBUG macro #define'd.  A word of warning:  This package was
+sufficient to debug the library, but is very primitive.  Other debugging
+malloc packages are available that are much more effective at diagnosing
+heap problems.
+

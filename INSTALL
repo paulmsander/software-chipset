@@ -1,0 +1,136 @@
+                                - INTRODUCTION -
+
+This directory is the root directory for the Software ChipSet, a collection
+of reusable software components.  See the file named "ChipSet" in this
+directory for additional information regarding the Software ChipSet's goals
+and capabilities.
+
+The src directory contains additional directories containing source code for
+each of the components.  Each component has its own "README" file to describe
+its capabilities and limitations.
+
+The Makefile installs the components into a staging area that is specified
+as a configuration option, and then installs the result into the system's
+install area (e.g. /usr/local).  Please see the file named "BUILD" in this
+directory for a detailed description of the build scaffolding.
+
+
+                           - UNPACKING INSTRUCTIONS -
+
+The Software ChipSet is distributed in a number of ways.  Following are
+the unpacking instructions for each of the distribution media on Unix
+systems.
+
+-- SHAR --
+
+Software ChipSet is distributed in several numbered shell archive files that
+unpack themselves when executed by the Bourne Shell.  The naming convention
+for the archives is "ChipSet.partxx" where "xx" is a two-digit number pad-
+ded with leading zeros.  To unpack the archives, follow these steps:
+
+1.  Edit each file to verify that the first line contains the text
+    "#! /bin/sh", removing anything preceding that line if necessary.
+    If this line is missing, then the archive file is corrupt and must
+    be replaced.
+2.  Verify that each file contains a line with the text "exit 0".  This
+    should be near the end of the archive.  If this line is missing, then
+    the archive is corrupt and must be replaced.
+3.  Invoke the archives as Bourne Shell scripts.  This can be done by
+    invoking the following command sequence in the C Shell:
+
+	foreach x ( `/bin/ls ChipSet.part* | /bin/sort` )
+	echo Unpacking $x
+	sh $x
+	end
+
+    To unpack the archive files using the Bourne or Korn shells, invoke
+    the following command sequence:
+
+	for x in `/bin/ls ChipSet.part* | /bin/sort`
+	do
+	echo Unpacking $x
+	sh $x
+	done
+
+
+-- CPIO --
+
+Software ChipSet is distributed in portable cpio archive files, which may
+have been compressed.  The name of the archive is ChipSet.cpio or
+ChipSet.cpio.Z by convention.  An archive named ChipSet.cpio can be unpacked
+by invoking the following command:
+
+	cpio -icdv < ChipSet.cpio
+
+An archive named ChipSet.cpio.Z can be unpacked by invoking the following
+command:
+
+	zcat ChipSet.cpio.Z | cpio -icdv
+
+
+-- TAR --
+
+Software ChipSet is distributed in "tar" archives, which may have been
+compressed.  The name of the archive is ChipSet.tar or ChipSet.tar.Z by
+convention.  An archive named ChipSet.tar can be unpacked by invoking the
+following command:
+
+	tar xvfo ChipSet.tar
+
+An archive named ChipSet.tar.Z can be unpacked by invoking the following
+command:
+
+	zcat ChipSet.tar.Z | tar xvfo -
+
+
+-- ZIP --
+
+Software ChipSet is distributed in "zip" archives.  The name of the archive
+is ChipSet.zip by convention.  To unpack the archive, invoke the following
+command:
+
+	unzip ChipSet.zip
+
+
+
+                             - BUILD INSTRUCTIONS -
+
+After unpacking the distribution archives, you may wish to verify the
+installation.  To do this, invoke the following command:
+
+	make verify
+
+This will verify that all of the source files required to build the Software
+ChipSet are present.
+
+Next, you must configure the build procedures in this directory as needed for
+your system.  The common.mk file will need changes, as it is used all of the
+makefiles included with the Software ChipSet.  Each of the configurable macros
+and rules are clearly documented there, with suggestions for how to change
+them.
+
+You must create the directory pointed to by the STAGE macro in the common.mk
+file.  If the STAGEINC, STAGELIB, STAGEMAN, STAGETMP, or STAGEINST macros
+were changed from their default values, it would be a good idea to create
+those directories as well.
+
+Next, do a "make all" to build the components and install them in a staging
+area where additional testing and inspection can be done if desired.
+
+Each of the components has a test program.  These can be run by doing
+a "make test" in this directory.  This builds all of the test cases and
+runs them, and gives a pass/fail indication for each test and for the
+entire suite.  Output from each test is appended to the file test.out
+in the tmp directory of the staging area.  Each test program is
+also self-contained, and may be run in the directory in which it resides.
+
+Perform a "make -n install" to verify the steps that will be taken by the
+installation process.  If they are correct for your system, perform a
+"make install".  This may require super-user access due to file permissions.
+This step places the library, public header files, and documentation in
+the appropriate place on a live system for general use.
+
+After installing the components, you may clean up the occupied disk space
+by doing a "make clean" or "make clobber".  Making "clean" removes all of
+the derived files except for the final product.  Making "clobber" cleans all
+of the derived files, including the final product.

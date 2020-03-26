@@ -1,0 +1,594 @@
+.TH DK_DUPKEY
+.SH NAME
+dk_compare,
+dk_data,
+dk_delFirst,
+dk_delLast,
+dk_delList,
+dk_destroy,
+dk_dump,
+dk_first,
+dk_freeSetup,
+dk_insert,
+dk_last,
+dk_new,
+dk_next,
+dk_prev,
+dk_search,
+dk_setData
+dk_setup,
+dk_setupBtree,
+dk_setupList,
+dk_traverse,
+\- In-memory index manipulation
+.SH SYNOPSIS
+#include <dlist.h>
+.br
+#include <dupkey.h>
+.sp
+int dk_compare(void *key1, void *key2)
+.sp
+DK_SETUP dk_setup(void*),
+void (*freeSetup)(void*),
+void *(*new)(void*),
+void (*destroy)(void*,void(*)(void*,void*),void(*)(void*,void*),void*),
+int (*insert)(void*,void*,void*),
+void *(*delete)(void*,void*,void**),
+void *(*search)(void*,void*,void**),
+void (*traverse)(void*,void(*)(void*,void*,void*),void*),
+void (*dump)(void*,void(*)(void*,void*,void*),void*),
+void *(*first)(void*,void**),
+void *(*last)(void*,void**),
+void *(*next)(void*,void**),
+void *(*prev)(void*,void**),
+int (*compare)(void*,void*),
+int oneKey,
+int insertOrder,
+void *data)
+.sp
+DK_SETUP dk_setupBtree(int treeOrder, int (*compare)(void*,void*), int oneKey,
+int insertOrder, void *data)
+.sp
+DK_SETUP dk_setupList(int (*compare)(void*,void*), int oneKey, int insertOrder,
+void *data)
+.sp
+void dk_freeSetup(DK_SETUP setup)
+.sp
+DK_DUPKEY dk_new(DK_SETUP setup)
+.sp
+void dk_destroy(DK_DUPKEY idx, void (*free_key)(void*,void*),
+void (*free_data)(void*,void*), void *info)
+.sp
+int dk_insert(DK_DUPKEY idx, void *key, void *data)
+.sp
+void	*dk_delFirst(DK_DUPKEY idx, void *key, void **data, int *safe)
+.sp
+void	*dk_delLast(DK_DUPKEY idx, void *key, void **data, int *safe)
+.sp
+DL_LIST	*dk_delList(DK_DUPKEY idx, void *key)
+.sp
+void *dk_search(DK_DUPKEY idx, void *target, void **data)
+.sp
+void dk_traverse(DK_DUPKEY idx, void (*fn)(void*,void*,void*), void *parms)
+.sp
+void dk_dump(DK_DUPKEY idx, void (*key_dump)(void*,void*,void*), void *info)
+.sp
+void *dk_first(DK_DUPKEY idx, void **data)
+.sp
+void *dk_last(DK_DUPKEY idx, void **data)
+.sp
+void *dk_next(DK_DUPKEY idx, void **data)
+.sp
+void *dk_prev(DK_DUPKEY idx, void **data)
+.sp
+void *dk_data(DK_DUPKEY idx)
+.sp
+void dk_setData(DK_DUPKEY idx, void *data)
+
+.SH DESCRIPTION
+These functions implement an in-memory index data structure that generalizes
+a Software ChipSet unique key index structure (btree, for example) to accept
+redundant keys.
+The index itself stores only pointers to the client's data, and relies on
+client-provided functions for any comparisons and memory management.
+The reader is urged to become familiar with one of these structures before
+learning about dupkey structures.
+.LP
+.B dk_compare
+is given as the comparison function to the underlying unique-key index.
+Normally, it's passed as an argument to the setup function (e.g. bt_setup).
+Because the duplicate key index does not store the client application's
+data directly in the underlying index, the index must have some awareness
+of the added layer above it to order the keys correctly.  This awareness
+is encapulated in the
+.B dk_compare
+function.
+.LP
+.B dk_setup
+builds a setup structure before an index can be created, returning a
+pointer to it or NULL if an error occurs.  The setup structure is a magic
+cookie that can be used to set up many indices.  It must be freed by calling
+.BR dk_freeSetup .
+The client application registers tuning and initialization parameters for
+the duplicate-key index, a setup structure for the underlying unique-key
+index, and callback functions for the unique-key index.
+The
+.I setup
+argument specifies a unique-key index setup structure (e.g. a
+.B BT_SETUP
+structure) that is used in the creation of new indices.
+The
+.I freeSetup
+argument specifies the unique-key index' freeSetup function (e.g.
+.B bt_freeSetup) that is called when the time comes to destroy the
+setup structure given by the
+.I setup
+argument.
+The
+.I new
+argument specifies the function that creates a new unique-key index (e.g.
+.BR bt_new )
+each time a new
+.B DUPKEY
+index is created.
+The
+.I destroy
+argument specifies the function that destroys an underlying unique-key
+index (e.g.
+.BR bt_destroy )
+whenever
+.B dk_destroy
+is called.
+The
+.I insert
+argument specifies the insertion function for the underlying unique-key
+index (e.g.
+.BR bt_insert ).
+The
+.I delete
+argument specifies the deletion function for the underlying unique-key
+index (e.g.
+.BR bt_delete ).
+The
+.I search
+argument specifies the search function for the underlying unique-key
+index (e.g.
+.BR bt_search ).
+The
+.I traverse
+argument specifies the traversal function for the underlying unique-key
+index (e.g.
+.BR bt_traverse ).
+The
+.I dump
+argument specifies the dump function for the underlying unique-key
+index (e.g.
+.BR bt_dump ).
+The
+.I first
+argument specifies the function that finds the lowest key in the unique-key
+index (e.g.
+.BR bt_first ).
+The
+.I last
+argument specifies the function that finds the highest key in the unique-key
+index (e.g.
+.BR bt_last ).
+The
+.I next
+argument specifies a function that finds the next higher key in the
+unique-key index (e.g.
+.BR bt_next ).
+The
+.I prev
+argument specifies a function that finds the next lower key in the
+unique-key index (e.g.
+.BR bt_prev ).
+The comparison function, 
+.BR compare ,
+has the following interface:
+.RS
+.B
+int comp(k1,k2)
+.br
+.B
+void *k1,*k2;
+.RE
+The result of this function is -1 if the object pointed to by k1 is "less than"
+the object pointed to by k2, 0 if they are "equal", and 1 otherwise.
+Client-provided data structures that
+compare greater by this function will appear later in the lexical order
+of the data stored in the index.
+The
+.I oneKey
+argument takes one of two values:
+.B DK_SINGLE
+indicates that all records that have matching keys physically share the
+keys, while
+.B DK_SEPARATE
+indicates that records that have matching keys each have their own copies
+of the keys.
+The
+.I insertOrder
+argument takes one of two values:
+.B DK_CHRON
+indicates that records that have matching keys are traversed in their
+insertion order, while
+.B DK_REVERSE
+reverses the order.
+The
+.I data
+argument initializes the value returned by the
+.B dk_data
+function.
+.LP
+.B dk_setupBtree
+is a convenience function to set up a duplicate key index based on a
+B-tree.  It combines calls to
+.B bt_setup
+and
+.B dk_setup
+to produce a
+.B DK_SETUP
+structure.  The
+.I treeOrder
+argument specifies the B-tree's order (as defined by the
+.B bt_setup
+function).  The
+.IR compare ,
+.IR oneKey ,
+.IR insertOrder ,
+and
+.I data
+arguments are as required by the
+.B dk_setup
+function.
+.LP
+.B dk_setupList
+is a convenience function to set up a duplicate key index based on a
+doubly-linked list.  It combines calls to
+.B dll_setup
+and
+.B dk_setup
+to produce a
+.B DK_SETUP
+structure.  The
+.IR compare ,
+.IR oneKey ,
+.IR insertOrder ,
+and
+.I data
+arguments are as required by the
+.B dk_setup
+function.
+.LP
+.B dk_freeSetup
+frees the setup structure created by
+.BR dk_setup ,
+.BR dk_setupBtree ,
+or
+.BR dk_setupList .
+It can be called any time after
+.B dk_new
+is called.  Indices do not require their setup structures to exist after they
+are created.  The user-defined structure (pointed to by
+.B data
+when
+.B dk_setup
+is called) is not affected in any way.
+.LP
+.B dk_new
+creates a new index.  Given a DK_SETUP setup structure,
+.B dk_new
+returns a pointer to a handle for the index, or NULL if an error occurs.
+.LP
+.B dk_destroy
+deallocates all storage allocated to an index.  The client provides a pointer
+to two visitation functions that are each called once for each item stored in
+the index.  The items are visited in arbitrary order.  If
+NULL is passed instead of a pointer to a function, no action is taken for
+the client-provided data or key, but the index structure itself is freed.
+The
+.I free_key
+and
+.I free_data
+parameters specify functions that free the keys and data stored in the tree.
+The
+.I free_data
+function is always called before the
+.I free_key
+function.
+If the index was created with the
+.B DK_SEPARATE
+attribute, the
+.I free_key
+function is called once for every record.
+If the index was created with the
+.B DK_SINGLE
+attribute, the
+.I free_key
+function is called once after all of the records sharing that key have been
+freed by the
+.I free_data
+function.
+The
+.I info
+parameter is always passed to both functions without modification.
+The interfaces for these functions follow:
+.sp
+	void freeThis(keyOrData,info)
+.br
+	void	*keyOrData;
+.br
+	void	*info;
+.LP
+.B dk_insert
+inserts a new item into the index.  1 is returned if the insertion was
+successful and the key is unique, -1 is returned if the insertion was
+successful and the new key matches another key that has
+already been inserted into the index, and 0 is returned in the event of an
+error.  The
+.B data
+parameter is a pointer to a user-defined data structure that is stored with
+the key, and can be retrieved by any access or deletion function.
+.LP
+.B dk_delFirst
+and
+.B dk_delLast
+delete items from an index.  The value returned is the key that was passed
+to
+.B dk_insert
+when the item was inserted, or NULL if the key is not found.  The
+.I data
+parameter returns the pointer stored with the key when
+.B dk_insert
+was called, or is undefined when the key is not found.
+.B dk_delFirst
+returns the data pointer for the first record matching the
+given key in the order it would be visited by
+.BR dk_traverse .
+.B dk_delLast
+returns the data pointer for the last record matching the
+given key in the order it would be visited by
+.BR dk_traverse .
+The data pointer must be freed by the client application.
+The integer pointed to by the
+.I safe
+pointer is set to a non-zero value when it is safe to free the
+key returned by
+.B dk_delFirst
+and
+.BR dk_delLast .
+.LP
+.B dk_delList
+deletes from an index all of the records matching the given key, and returns
+them in a linked list.  For indices created with the DK_SINGLE attribute,
+the list's global data value (retrieved by
+.BR dll_data )
+points to the shared key and all of the key values stored within the list
+are NULL.  For indices created with the DK_SEPARATE attribute, the list's
+global data value (which is accessed by calling
+.BR dll_data )
+is NULL and all of the keys appear with their data pointers
+within the list.  The list is destroyed by calling
+.B dll_destroy
+with appropriate considerations of the global data value and keys.
+.LP
+.B dk_search
+searches for an item in a tree.  The value returned is the same as that passed
+to
+.B dk_insert
+when the item was inserted, or NULL if the item is not found.  The
+.B data
+parameter returns the first pointer matching the key that would be found by 
+.BR dk_traverse .
+.LP
+.B dk_traverse
+traverses the index, calling a client-provided visitation function
+.I fn
+once for each item stored there.
+.I fn
+has the following interface:
+.RS
+void fn(key,parms,data)
+.br
+void *key;
+.br
+void *parms;
+.br
+void *data;
+.RE
+.LP
+.I key
+points to a key.
+.I parms
+is an arbitrary pointer that the client wishes to pass to the visitation
+function, but is otherwise unused by the index implementation.
+.I data
+is a pointer to a user-defined structure that is stored when
+.B dk_insert
+is called.
+Items are visited in their lexical order according to their keys.  When
+multiple items have the same key value, the items are visited in the order
+in which they were inserted if the index was created with the DK_CHRON
+attribute, or in reverse order otherwise.
+.sp
+.B dk_dump
+displays the contents of the index to stdout, along with some diagnostic and
+statistical information.  The
+.B key_dump
+function is called once for each item in the tree, in arbitrary order.  It
+may be NULL if no action is desired.  Its interface follows:
+.RS
+.B
+void key_dump(key,data,info)
+.br
+.B
+void *key;
+.br
+.B
+void *data;
+.br
+.B
+void *info;
+.RE
+Where
+.I key
+is a key stored in the index,
+.I data
+is the user-defined pointer stored with the key at the time
+.B dk_insert
+was called, and
+.I info
+is arbitrary data passed to the
+.B dk_dump
+function as the
+.I info
+parameter.
+.LP
+.B dk_first
+returns the key that falls earliest in the lexical order of the items
+stored in the tree, or NULL if the tree is empty.  The user-defined pointer
+stored with the key is also returned in the
+.I data
+parameter.  The
+.I data
+pointer points to the first record stored with the given key if the
+index was created with the
+.B DK_CHRON
+attribute, or the most recently stored record otherwise.
+.LP
+.B dk_last
+returns the key that falls latest in the lexical order of the items
+stored in the tree, or NULL if the tree is empty.  The user-defined pointer
+stored with the key is also returned in the
+.I data
+parameter.  The
+.I data
+pointer points to the record most recently stored with the given key if the
+index was created with the
+.B DK_CHRON
+attribute, or the first stored record otherwise.
+.LP
+.B dk_next
+returns the next record stored in the index after last one returned by
+.BR dk_first ,
+.BR dk_next ,
+.BR dk_prev ,
+or
+.BR dk_search .
+Records are visited in the same order as with
+.BR dk_traverse .
+If
+.B dk_search
+failed to find an item,
+.B dk_next
+returns the next item higher in the
+lexical order that was stored in the tree.  NULL is returned if
+the last call to
+.B dk_next
+returned the item falling highest in the
+lexical order of the items stored in the tree, or if the tree was
+modified since the last call to
+.B dk_next
+or
+.BR dk_prev .
+If a key is found, the user-defined pointer stored with the key is also returned
+in the
+.B data
+parameter.
+.LP
+.B dk_prev
+returns the item stored in the index before the last key
+returned by
+.BR dk_last ,
+.BR dk_next ,
+.b dk_prev ,
+or
+.BR dk_search .
+Records are visited in the reverse order as with
+.BR dk_traverse .
+If
+.B dk_search
+failed to find an item,
+.B dk_prev
+returns the next item lower in the
+lexical order that was stored in the tree.  NULL is returned if
+the last call to
+.B dk_prev
+returned the item falling lowest in the
+lexical order of the items stored in the tree, or if the tree was
+modified since the last call to
+.B dk_next
+or
+.BR dk_prev .
+If a key is found, the user-defined pointer stored with the key is also returned
+in the
+.B data
+parameter.
+.LP
+.B NOTE:
+NULL can safely be passed as the
+.B data
+parameter in any of the access functions (
+.BR dk_search ,
+.BR dk_first ,
+.BR dk_next ,
+.BR dk_last ,
+or
+.BR dk_prev )
+or deletion function (
+.BR dk_delete ).
+.LP
+.B dk_setData
+sets an arbitrary data pointer that is kept with a given index.  The
+value of this pointer is retrieved by
+.BR dk_data .
+This pointer is also initialized when the index is created by passing the
+.I data
+argument to
+.BR dk_setup ,
+.BR dk_setupBtree ,
+or
+.BR dk_setupList .
+.LP
+Worst case performance characteristics are listed below.
+Here "I(op)" indicates the performance of the underlying unique-key index
+for the indicated operation given the number of keys stored in the index,
+"m" is number of records matching a selected key,
+"n" is the number of keys stored in the index,
+and "p" is the total number of records stored in the index.
+.RS
+dk_compare:	Same as client-specified function given to
+.B dk_setup
+.br
+dk_data:	O(1)
+dk_delFirst:	I(search) + I(delete)
+dk_delLast:	I(search) + I(delete)
+dk_delList:	I(delete)
+dk_destroy:	I(destroy) + I(p)
+dk_dump:	I(dump) + I(traverse) + (p)
+dk_first:	I(first)
+dk_freeSetup:	I(freeSetup) + O(1)
+dk_insert:	I(search) + I(insert)
+dk_last:	I(last)
+dk_new:		I(new)
+dk_next:	I(next)
+dk_prev:	I(prev)
+dk_search:	I(search)
+dk_setData:	O(1)
+dk_setup:	O(1)
+dk_setupBtree:	O(1)
+dk_setupList:	O(1)
+dk_traverse:	I(traverse) + O(p)
+.RE
+.sp
+The index implementation is reentrant.
+.SH SEE ALSO
+btree(3l), dlist(3l)
+.SH BUGS
+This implementation has not been tested on nearly enough platforms.
+.sp
+.B dk_dump
+assumes that pointers are the same size as integers, and that they can be
+displayed in total in eight hexidecimal digits.

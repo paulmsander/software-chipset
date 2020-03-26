@@ -1,0 +1,12 @@
+MANIFEST
+Makefile
+README
+freadln.c
+gct-ctrl
+patchlevel.h
+readln.c
+readln.h
+readln.man
+test.c
+test.in
+xreadln.c

@@ -1,0 +1,95 @@
+.TH READLN
+.SH NAME
+readln, freadln, xreadln \-
+Read full line of text into dynamically sized buffer.
+.SH SYNOPSIS
+#include <stdio.h>
+.br
+#include <readln.h>
+.sp
+#ifdef __STDC__
+.sp
+void xfreeln(void)
+.br
+char *xreadln(void *str, char *(*fn)(char *buf, int len, void *str))
+.br
+char *freadln(FILE *str)
+.br
+char *readln(void)
+.sp
+#else
+.sp
+void xfreeln()
+.br
+char *xreadln()
+.br
+char *freadln()
+.br
+char *readln()
+.sp
+#endif
+.SH DESCRIPTION
+.LP
+These routines provide a simple means to read an entire line of text from
+an input stream without regard for its length; input is read into a buffer
+that is resized as needed to accomodate the text.  The
+.B xreadln
+interface is generic.  The
+.B freadln
+interface is specialized to work with buffered I/O streams.
+The
+.B readln
+interface is specialized to work with the
+.B stdin
+stream.
+.LP
+The first argument of the
+.B xreadln
+interface identifies the input stream from which text is read.
+This is an opaque type, and any pointer can be used.  The
+.B freadln
+and
+.B readln
+specializations give a
+.B FILE*
+argument here.
+.LP
+The second argument of the
+.B xreadln
+interface specifies the routine that is used to perform the input.
+This function accepts as its first argument the address of a buffer into
+which text is read.  Its second argument is the size of the buffer.  The
+third argument identifies the stream.
+The return value is NULL if an error occurs or EOF is reached, non-NULL
+otherwise.
+Note that the semantics of this argument are very similar to the
+standard
+.B fgets
+function, and the
+.B freadln
+and
+.B readln
+specializations give the
+.B fgets
+function here.
+.LP
+Although all of these functions return the address of a statically-scoped
+buffer that is allocated on the heap using
+.BR malloc ,
+the
+.B xfreeln
+interface must be used to free this storage and reset additional internal
+state.  Note that
+.B free
+cannot be used directly on the return values of the
+.B readln
+interfaces, or else the heap will be corrupted.
+The
+.B xfreeln
+function needs to be called by a program only once after all of the
+.B xreadln
+calls (or specializations) are complete.
+However, calling it additional times during the execution of the program
+is not harmful.
+.SH SEE ALSO
+fgets(3)

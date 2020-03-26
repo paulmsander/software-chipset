@@ -1,0 +1,9 @@
+(options files)
+# Do not use operand coverage; it dumps core!
+# Do not use race coverage; it produces bad code!
+# Unit options:  (coverage branch loop multi relational operator operand)
+# System options:  (coverage routine call race)
+# Unit and system options cannot be mixed.
+(coverage branch loop multi relational operator)
+#(coverage routine call)
+-test.c

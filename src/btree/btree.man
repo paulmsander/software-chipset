@@ -1,0 +1,491 @@
+.TH BTREE
+.SH NAME
+bt_dump, bt_search, bt_setup, bt_freeSetup, bt_new, bt_destroy, bt_insert,
+bt_traverse, bt_delete, bt_rank, bt_delRank, bt_data, bt_setData -
+In-memory B-tree manipulation
+.SH SYNOPSIS
+#include <btree.h>
+.sp
+#ifdef __STDC__
+.sp
+BT_SETUP bt_setup(int order, int (*comp)(void*,void*), void *data)
+.sp
+void bt_freeSetup(BT_SETUP setup)
+.sp
+BTREE bt_new(BT_SETUP setup)
+.sp
+void bt_destroy(BTREE tree, void (*free_key)(void*,void*),
+void (*free_data)(void*,void*), void *info)
+.sp
+int bt_insert(BTREE tree, void *key, void *data)
+.sp
+void	*bt_delete(BTREE tree, void *key, void **data)
+.sp
+void *bt_search(BTREE tree, void *target, void **data)
+.sp
+void bt_traverse(BTREE tree, void (*fn)(void*,void*,void*), void *parms)
+.sp
+void bt_dump(BTREE tree, void (*key_dump)(void*,void*,void*), void *info)
+.sp
+void *bt_first(BTREE tree, void **data)
+.sp
+void *bt_last(BTREE tree, void **data)
+.sp
+void *bt_next(BTREE tree, void **data)
+.sp
+void *bt_prev(BTREE tree, void **data)
+.sp
+void *bt_rank(BTREE tree, int rank, void **data)
+.sp
+void *bt_delRank(BTREE tree, int rank, void **data)
+.sp
+void *bt_data(BTREE tree)
+.sp
+void bt_setData(BTREE tree, void *data)
+.sp
+#else
+.sp
+BT_SETUP bt_setup(order,comp,data)
+.br
+int	order;
+.br
+int	(*comp)();
+.br
+void	*data;
+.sp
+void bt_freeSetup(setup)
+.br
+BT_SETUP	setup;
+.sp
+BTREE bt_new(setup)
+.br
+BT_SETUP	setup;
+.sp
+void bt_destroy(tree,free_key,free_data,info)
+.br
+BTREE	tree;
+.br
+void	(*free_key)();
+.br
+void	(*free_data)();
+.br
+void	*info;
+.sp
+int bt_insert(tree,key,data)
+.br
+BTREE	tree;
+.br
+void	*key;
+.br
+void	*data;
+.sp
+void	*bt_delete(tree,key,data)
+.br
+BTREE	tree;
+.br
+void	*key;
+.br
+void	**data;
+.sp
+void *bt_search(tree,target,data)
+.br
+BTREE	tree;
+.br
+void	*target;
+.br
+void	**data;
+.sp
+void bt_traverse(tree,fn,parms)
+.br
+BTREE	tree;
+.br
+void	(*fn)();
+.br
+void	*parms;
+.sp
+void bt_dump(tree,key_dump,info)
+.br
+BTREE	tree;
+.br
+void	(*key_dump)();
+.br
+void	*info;
+.sp
+void *bt_first(tree,data)
+.br
+BTREE	tree;
+.br
+void	**data;
+.sp
+void *bt_last(tree,data)
+.br
+BTREE	tree;
+.br
+void	**data;
+.sp
+void *bt_next(tree,data)
+.br
+BTREE	tree;
+.br
+void	**data;
+.sp
+void *bt_prev(tree,data)
+.br
+BTREE	tree;
+.br
+void	**data;
+.sp
+void *bt_rank(tree,rank,data)
+.br
+BTREE	tree;
+.br
+int	rank;
+.br
+void	**data;
+.sp
+void *bt_delRank(tree,rank,data)
+.br
+BTREE	tree;
+.br
+int	rank;
+.br
+void	**data;
+.sp
+void *bt_data(tree)
+.br
+BTREE	tree;
+.sp
+void bt_setData(tree,data)
+.br
+BTREE	tree;
+.br
+void	*data;
+.sp
+#endif
+.SH DESCRIPTION
+These functions implement an in-memory B-tree data structure.  The tree
+itself stores only pointers to the client's data, and relies on
+client-provided functions for any comparisons and storage deallocation.
+.sp
+.B bt_setup
+builds a setup structure before a B-tree can be created, or NULL if an
+error occurs.  The setup structure is a magic
+cookie that can be used to set up many B-trees.  It must be freed by calling
+.BR bt_freeSetup .
+The client specifies the desired order (the maximum
+number of children allowed each node) of the tree to be set up
+(for performance trade-offs based on the efficiency of comparisons of
+client-provided data), an optional pointer to a user-defined structure that
+is stored once with the tree, and a pointer to a function that compares two
+client-provided data structures.  The comparison function, 
+.BR comp ,
+has the following interface:
+.RS
+.B
+int comp(k1,k2)
+.br
+.B
+void *k1,*k2;
+.RE
+The result of this function is -1 if the object pointed to by k1 is "less than"
+the object pointed to by k2, 0 if they are "equal", and 1 otherwise.
+Client-provided data structures that
+compare greater by this function will appear later in the lexical order
+of the data stored in the tree.
+The client may also specify the initial value of the data returned by
+.B bt_getData
+after a tree is instantiated.
+.sp
+.B bt_freeSetup
+frees the setup structure created by
+.BR bt_setup .
+It can be called any time after
+.B bt_new
+is called.  B-trees do not require their setup structures to exist after they
+are created.  The user-defined structure (pointed to by
+.B data
+when
+.B bt_setup
+is called) is not affected in any way.
+.sp
+.B bt_new
+creates a new B-tree.  Given a BT_SETUP setup structure,
+.B bt_new
+returns a pointer to a handle for the B-tree, or NULL if an error occurs.
+.sp
+.B bt_destroy
+deallocates all storage allocated to a B-tree.  The client provides a pointer
+to two visitation functions that are each called once for each item stored in
+the tree.  The items are visited in arbitrary order.  If
+NULL is passed instead of a pointer to a function, no action is taken for
+the client-provided data or key, but the tree structure itself is freed.
+The
+.B free_key
+and
+.B free_data
+parameters specify functions that free the keys and data stored in the tree.
+The
+.B free_data
+function is always called before the
+.B free_key
+function.  The
+.B info
+parameter is always passed to both functions without modification.
+The interfaces for these functions follow:
+.sp
+	void freeThis(keyOrData,info)
+.br
+	void	*keyOrData;
+.br
+	void	*info;
+.sp
+.B bt_insert
+inserts a new item into the tree.  1 is returned if the insertion was
+successful, -1 is returned if the new item matches another item that has
+already been inserted into the tree, and 0 is returned in the event of an
+error.  The
+.B data
+parameter is a pointer to a user-defined data structure that is stored with
+the key, and can be retrieved by any access or deletion function.
+.sp
+.B bt_delete
+deletes an item from a tree.  The value returned is the same as that passed
+to
+.B bt_insert
+when the item was inserted, or NULL if the item is not found.  The
+.B data
+parameter returns the pointer stored with the key when
+.B bt_insert
+was called, or is undefined when the key is not found.
+.sp
+.B bt_search
+searches for an item in a tree.  The value returned is the same as that passed
+to
+.B bt_insert
+when the item was inserted, or NULL if the item is not found.  The
+.B data
+parameter returns the pointer stored with the key when
+.B bt_insert
+was called, or is undefined if the key is not found.
+.sp
+.B bt_traverse
+traverses the tree, calling a client-provided visitation function
+.B fn
+once for each item stored there.
+.B fn
+has the following interface:
+.RS
+.B
+void fn(item,parms,data)
+.br
+.B
+void *item;
+.B
+.br
+.B
+void *parms;
+.br
+.B
+void *data;
+.RE
+.B item
+is the pointer stored when the item was inserted into the tree.
+.B parms
+is an arbitrary pointer that the client wishes to pass to the visitation
+function, but is otherwise unused by the B-tree implementation.
+.B data
+is a pointer to a user-defined structure that is stored with the key when
+.B bt_insert
+is called.
+Items are visited in their lexical order.
+.sp
+.B bt_dump
+displays the contents of the tree to stdout, along with some diagnostic and
+statistical information.  The
+.B key_dump
+function is called once for each item in the tree, in arbitrary order.  It
+may be NULL if no action is desired.  Its interface follows:
+.RS
+.B
+void key_dump(key,data,info)
+.br
+.B
+void *key;
+.br
+.B
+void *data;
+.br
+.B
+void *info;
+.RE
+Where
+.B key
+is a key stored in the B-tree,
+.B data
+is the user-defined pointer stored with the key at the time
+.B bt_insert
+was called, and
+.B info
+is arbitrary data passed to the bt_dump function as the
+.B info
+parameter.
+.sp
+.B bt_first
+returns the item that falls earliest in the lexical order of the items
+stored in the tree, or NULL if the tree is empty.  The user-defined pointer
+stored with the key is also returned in the
+.B data
+parameter.
+.sp
+.B bt_last
+returns the item that falls latest in the lexical order of the items
+stored in the tree, or NULL if the tree is empty.  The user-defined pointer
+stored with the key is also returned in the
+.B data
+parameter.
+.sp
+.B bt_next
+returns the next item higher in the lexical order after the last key
+returned by
+.BR bt_first ,
+.BR bt_next ,
+.BR bt_prev ,
+.BR bt_rank ,
+or
+.BR bt_search .
+If
+.B bt_search
+failed to find an item,
+.B bt_next
+returns the next item higher in the
+lexical order that was stored in the tree.  NULL is returned if
+the last call to
+.B bt_next
+returned the item falling highest in the
+lexical order of the items stored in the tree, or if the tree was
+modified since the last call to
+.B bt_next
+or
+.BR bt_prev .
+If a key is found, the user-defined pointer stored with the key is also returned
+in the
+.B data
+parameter.
+.sp
+.B bt_prev
+returns the next item lower in the lexical order after the last key
+returned by
+.BR bt_last ,
+.BR bt_next ,
+.b bt_prev ,
+.b bt_rank ,
+or
+.BR bt_search .
+If
+.B bt_search
+failed to find an item,
+.B bt_prev
+returns the next item lower in the
+lexical order that was stored in the tree.  NULL is returned if
+the last call to
+.B bt_prev
+returned the item falling lowest in the
+lexical order of the items stored in the tree, or if the tree was
+modified since the last call to
+.B bt_next
+or
+.BR bt_prev .
+If a key is found, the user-defined pointer stored with the key is also returned
+in the
+.B data
+parameter.
+.sp
+.B bt_rank
+returns the key in the B-tree that falls in the
+.BR rank th
+position in the lexical order of all keys stored in the tree.
+The
+.B rank
+parameter is zero-based.
+NULL is returned if the specified rank is less than 0 or greater or equal to
+the number of keys stored in the tree.
+If the call succeeds, the tree is left in a state such that
+.B bt_next
+and
+.B bt_prev
+behave as expected.  The user-defined pointer stored with the key is also
+returned in the
+.B data
+parameter.
+.sp
+.B bt_delRank
+deletes the key stored in the specified lexical position in the B-tree.
+The value returned is the same as that passed to
+.B bt_insert
+when the item was inserted, or NULL if the specified
+.B rank
+is invalid.
+.B rank
+is zero-based, and must be less than the number of keys stored in the tree.
+The user-defined pointer stored with the key is also returned in the
+.B data
+parameter.
+.sp
+.B NOTE:
+NULL can safely be passed as the
+.B data
+parameter in any of the access functions (
+.BR bt_search ,
+.BR bt_first ,
+.BR bt_next ,
+.BR bt_last ,
+.BR bt_prev ,
+or
+.BR bt_rank )
+or deletion functions (
+.B bt_delete
+or
+.BR bt_delRank ).
+.sp
+Worst case performance characteristics are listed below.  Here, "m" is number
+passed as the "order" parameter to bt_setup, and "n" is the number of items
+stored in the tree.
+.RS
+bt_search:	O(m * log n)
+.br
+bt_new:		O(1)
+.br
+bt_destroy:	O(log n) + O(n) when free_key is not NULL
+.br
+		O(log n) otherwise
+.br
+bt_insert:	O(m * log n)
+.br
+bt_delete:	O(m * log n)
+.br
+bt_traverse:	O(n)
+.br
+bt_next:		O(log n)
+.br
+bt_prev:		O(log n)
+.br
+bt_first:		O(log n)
+.br
+bt_last:		O(log n)
+.br
+bt_rank:	O(m * log n)
+.br
+bt_delRank:	O(m * log n)
+.br
+bt_data:	O(1)
+.br
+bt_setData:	O(1)
+.RE
+.sp
+The B-tree implementation is reentrant.
+.SH BUGS
+This implementation has not been tested on nearly enough platforms.
+.sp
+.B bt_dump
+assumes that pointers are the same size as integers, and that they can be
+displayed in total in eight hexidecimal digits.
