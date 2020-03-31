@@ -15,7 +15,7 @@
 #include "dupkey.h"
 
 /* Define this for verbose output */
-/* #define VERBOSE */
+#define VERBOSE
 
 /* These are the list operations that the program tests */
 
@@ -484,7 +484,7 @@ void	*info;
 #endif
 {
 #ifdef VERBOSE
-	printf("Freeing key %d at %x\n",*(int*)key,key);
+	printf("Freeing key %d at %lx\n",*(int*)key,(unsigned long) key);
 #endif
 	if ((int*) info != expInfo)
 	{
@@ -513,7 +513,7 @@ void	*info;
 #endif
 {
 #ifdef VERBOSE
-	printf("Freeing data %d at %x\n",*(int*)key,key);
+	printf("Freeing data %d at %lx\n",*(int*)key,(unsigned long) key);
 #endif
 	if ((int*) info != expInfo)
 	{
@@ -888,8 +888,19 @@ char	**argv;
 			break;
 
 	case FREESETUP:
+			printf("Running dk_freeSetup %lx\n", (unsigned long) setup);
 			dk_freeSetup(setup);
-			if ( suite[i].data ) dll_freeSetup(isetup);
+#if 0
+			/*
+			 * The following was removed because dk_freeSetup
+			 * calls dll_freeSetup.  Thus, the following code
+			 * raises a duplicate free error in the malloc library.
+			 */
+			if ( suite[i].data ) {
+				printf(" Running dll_freeSetup %lx\n", (unsigned long) isetup);
+				dll_freeSetup(isetup);
+			}
+#endif
 			setup = (DLL_SETUP) NULL;
 			isetup = NULL;
 			break;

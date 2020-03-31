@@ -10,7 +10,10 @@
  *
  **************************************************************/
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <signal.h>
 
 /* The following structure is used for debugging heap corruptions */
 
@@ -63,7 +66,7 @@ void	*ptr;
 {
 	int	i;
 
-	printf("Freeing heap storage at %x\n",ptr);
+	printf("Freeing heap storage at %lx\n",(unsigned long) ptr);
 	for (i = 0; i < btheap.allocSeq; i++)
 	{
 		if (ptr == btheap.blks[i].blk)
@@ -78,13 +81,13 @@ void	*ptr;
 			else
 			{
 				printf(
-				  "ERROR: freeing %x which was already freed\n",
-				  ptr);
+				  "ERROR: freeing %lx which was already freed\n",
+				  (unsigned long) ptr);
 				printf("Block\n");
 				i = btheap.freeLast;
 				while (i > 0)
 				{
-					printf("%x\n",btheap.blks[i].blk);
+					printf("%lx\n",(unsigned long) btheap.blks[i].blk);
 					i = btheap.blks[i].freeNext;
 				}
 				fflush(stdout);
@@ -92,7 +95,7 @@ void	*ptr;
 			}
 		}
 	}
-	printf("ERROR:  Freeing %x which has not been allocated\n",ptr);
+	printf("ERROR:  Freeing %lx which has not been allocated\n",(unsigned long) ptr);
 	fflush(stdout);
 	kill(getpid(),5);
 }

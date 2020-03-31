@@ -11,9 +11,10 @@
  *
  ********************************************************************/
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
-#include <malloc.h>
+#include <string.h>
 
 /*
  * This is the static buffer.  It is allocated on the heap, and signal

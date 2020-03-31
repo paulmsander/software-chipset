@@ -221,7 +221,7 @@ int	n;
  *********************************************************************/
 
 #ifdef __STDC__
-static bt_rebalance(BTNODE *node, int n, int order)
+static void bt_rebalance(BTNODE *node, int n, int order)
 #else
 static bt_rebalance(node,n,order)
 BTNODE	*node;

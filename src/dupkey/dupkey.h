@@ -48,6 +48,7 @@ void		dk_destroy DK_ARGS((DK_DUPKEY, void (*)(void*,void*),
 		           void (*)(void*,void*), void*));
 void		dk_dump DK_ARGS((DK_DUPKEY,void (*)(void*,void*,void*),void*));
 void		*dk_first DK_ARGS((DK_DUPKEY, void**));
+void		dk_freeSetup DK_ARGS((DK_SETUP));
 int		dk_insert DK_ARGS((DK_DUPKEY pindex, void *key, void *data));
 void		*dk_last DK_ARGS((DK_DUPKEY, void**));
 DK_DUPKEY	dk_new DK_ARGS((DK_SETUP));

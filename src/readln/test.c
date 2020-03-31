@@ -10,12 +10,14 @@
  *
  *******************************************************************/
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "readln.h"
 
 char	*file = "test.in";
 
-main()
+int main()
 {
 	char	b[200];
 	char	*l1;

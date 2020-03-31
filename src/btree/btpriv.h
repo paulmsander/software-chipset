@@ -9,6 +9,8 @@
  *
  **********************************************************************/
 
+#include <stdlib.h>
+
 /* The following structure describes a B-tree node. */
 
 #ifdef __STDC__

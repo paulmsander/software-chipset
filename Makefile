@@ -77,7 +77,7 @@ prep:
 	then								\
 		echo The $(STAGE) directory does not exist.  Please;	\
 		echo create it.;					\
-		/bin/false;						\
+		false;						\
 	else								\
 		for x in $(STAGEINC) $(STAGELIB) $(STAGEMAN)	 	\
 		         $(STAGEMAN)/man3 $(STAGETMP);			\
@@ -274,7 +274,7 @@ clean:
 	if [ -d $(STAGELIB) ];						\
 	then								\
 		cd $(STAGELIB);						\
-		> /dev/null 2>&1 files=* /bin/true;			\
+		> /dev/null 2>&1 files=* true;				\
 		if [ "$$files" != "" ];					\
 		then							\
 			for x in $$files;				\
@@ -415,7 +415,7 @@ tar:
 			ln $$x $(STAGETMP)/ChipSet/$$x;			\
 			read x;						\
 		done;							\
-		/bin/true;						\
+		true;							\
 	) < $(STAGETMP)/MANIFEST
 	( cd $(STAGETMP)/ChipSet; tar cf - . ) | compress 		\
 		> $(STAGEINST)/ChipSet.tar.Z
@@ -451,7 +451,7 @@ zip:
 			ln $$x $(STAGETMP)/ChipSet/$$x;			\
 			read x;						\
 		done;							\
-		/bin/true;						\
+		true;							\
 	) < $(STAGETMP)/MANIFEST
 	rm -f $(STAGEINST)/ChipSet.zip
 	echo Software ChipSet |						\

@@ -5,6 +5,7 @@
  *
  ***********************************************************************/
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <dlist.h>
 #include "dkpriv.h"

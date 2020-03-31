@@ -43,8 +43,8 @@ void	*info;
 		printf("ERROR:  null node pointer\n");
 		return;
 	}
-	printf("%08x: %d keys (keys %08x, children %08x, data %08x),\n",
-	       (int) node,node->nkeys,node->keys,node->children,node->data);
+	printf("%08lx: %d keys (keys %08lx, children %08lx, data %08lx),\n",
+	       (unsigned long) node, node->nkeys,(unsigned long) node->keys,(unsigned long) node->children,(unsigned long) node->data);
 	printf("currKey = %d, parent = %08x, tsize = %d\n",
 	       node->currKey,(int) node->parent,node->tsize);
 	printf("--------\n");

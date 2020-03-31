@@ -5,6 +5,7 @@
  *
  **************************************************************************/
 
+#include <stdlib.h>
 #include <stdio.h>
 #include "dkpriv.h"
 
@@ -41,7 +42,7 @@ void	*info;		/* Client-specified info */
 
 	list = (DL_LIST) key;
 	ldata = (DK_LISTDATA*) dll_data(list);
-	printf("key %08x, list %08x\n",ldata->key,list);
+	printf("key %08lx, list %08lx\n",(unsigned long) ldata->key,(unsigned long) list);
 }
 
 /**************************************************************************
@@ -68,7 +69,7 @@ void	*data;		/* Null pointer */
 	list = (DL_LIST) key;
 	info = (DKINFO*) pinfo;
 	ldata = (DK_LISTDATA*) dll_data(list);
-	printf("list %08x, key %08x\n\n",list,ldata->key);
+	printf("list %08lx, key %08lx\n\n",(unsigned long) list,(unsigned long) ldata->key);
 	dll_dump(list,info->dump,info->info);
 	printf("---\n");
 }
@@ -96,13 +97,13 @@ void		*info;
 		index = (struct dupkey*) pindex;
 
 		/* Display duplicate key structure */
-		printf("Contents of duplicate key index %x:\n\n",pindex);
+		printf("Contents of duplicate key index %lx:\n\n",(unsigned long) pindex);
 		printf("Keys are allocated one per %s\n",
 		       ((index->oneKey == DK_SINGLE) ? "list" : "item"));
 		printf("Data are inserted in %s order\n",
 		       ((index->order == DK_CHRON) ? "chronological" :
 		                                     "reverse"));
-		printf("Global data %x\n",(long)(index->data));
+		printf("Global data %lx\n",(long)(index->data));
 		printf("Changed %d\n\n",index->changed);
 
 		/* Dump the index */

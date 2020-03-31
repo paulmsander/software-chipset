@@ -154,8 +154,8 @@ LFLAGS =
 # must be linked.  Presently, none are really needed, but libmalloc often
 # provides a better memory allocator than libc.a .
 
-#TESTLIBS=
-TESTLIBS=-lmalloc
+TESTLIBS=
+#TESTLIBS=-lmalloc
 
 ################
 
@@ -169,7 +169,7 @@ MANSUFF=3l
 # have ranlib, use /bin/true
 
 #RANLIB=/bin/ranlib
-RANLIB=/bin/true
+RANLIB=true
 
 ################
 
