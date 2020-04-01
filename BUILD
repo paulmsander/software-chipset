@@ -176,11 +176,11 @@ NROFF -- A filter that translates Troff source to ASCII plaintext.  This
          simply "nroff -man".
 COMPRESS -- A filter that compresses ASCII plaintext.  This is used to compress
             man pages on those systems that support it.  This defaults to
-            "compress", but should be "/bin/cat" on systems that do not support
+            "gzip -c", but should be "/bin/cat" on systems that do not support
             compressed man pages.
 ZSUFF -- The extension appended to a man page's file name and
          $(MANSUFF) extension if the target system requires its
-         man pages to be compressed.  The default value is ".Z", but should
+         man pages to be compressed.  The default value is ".gz", but should
          be the null string on systems that do not support compressed man
          pages.
 INSTALLMAN -- A filter that reads a man page in Troff source form

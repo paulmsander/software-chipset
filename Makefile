@@ -375,8 +375,8 @@ cpio:
 				>> $(STAGETMP)/MANIFEST;		\
 		fi;							\
 	done
-	cpio -ocv < $(STAGETMP)/MANIFEST | compress 			\
-		> $(STAGEINST)/ChipSet.cpio.Z
+	cpio -ocv < $(STAGETMP)/MANIFEST | gzip -c 			\
+		> $(STAGEINST)/ChipSet.cpio.gz
 	rm $(STAGETMP)/MANIFEST
 
 # This rule builds a tar archive.
@@ -417,8 +417,8 @@ tar:
 		done;							\
 		true;							\
 	) < $(STAGETMP)/MANIFEST
-	( cd $(STAGETMP)/ChipSet; tar cf - . ) | compress 		\
-		> $(STAGEINST)/ChipSet.tar.Z
+	( cd $(STAGETMP)/ChipSet; tar cf - . ) | gzip -c 		\
+		> $(STAGEINST)/ChipSet.tar.gz
 	rm -rf $(STAGETMP)/MANIFEST $(STAGETMP)/ChipSet
 
 # This rule builds a zip archive.

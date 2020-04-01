@@ -57,30 +57,30 @@ ded with leading zeros.  To unpack the archives, follow these steps:
 
 Software ChipSet is distributed in portable cpio archive files, which may
 have been compressed.  The name of the archive is ChipSet.cpio or
-ChipSet.cpio.Z by convention.  An archive named ChipSet.cpio can be unpacked
+ChipSet.cpio.gz by convention.  An archive named ChipSet.cpio can be unpacked
 by invoking the following command:
 
 	cpio -icdv < ChipSet.cpio
 
-An archive named ChipSet.cpio.Z can be unpacked by invoking the following
+An archive named ChipSet.cpio.gz can be unpacked by invoking the following
 command:
 
-	zcat ChipSet.cpio.Z | cpio -icdv
+	gzip -cd ChipSet.cpio.gz | cpio -icdv
 
 
 -- TAR --
 
 Software ChipSet is distributed in "tar" archives, which may have been
-compressed.  The name of the archive is ChipSet.tar or ChipSet.tar.Z by
+compressed.  The name of the archive is ChipSet.tar or ChipSet.tar.gz by
 convention.  An archive named ChipSet.tar can be unpacked by invoking the
 following command:
 
 	tar xvfo ChipSet.tar
 
-An archive named ChipSet.tar.Z can be unpacked by invoking the following
+An archive named ChipSet.tar.gz can be unpacked by invoking the following
 command:
 
-	zcat ChipSet.tar.Z | tar xvfo -
+	gzip -cd ChipSet.tar.gz | tar xvfo -
 
 
 -- ZIP --

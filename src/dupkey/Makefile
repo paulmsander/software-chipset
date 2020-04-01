@@ -37,8 +37,7 @@ installDocs:    dupkey.man
 
 # This produces the library.  ranlib is desireable on BSD-derived systems.
 $(TARGET): $(OBJECTS)
-	$(AR) $@ `lorder $? | tsort`
-	$(RANLIB) $@
+	$(AR) $@ $(OBJECTS)
 
 # This produces the object code.
 $(OBJECTS): dkpriv.h dupkey.h

@@ -31,10 +31,10 @@ void	*info;
 	}
 
 	list = (LIST*) plist;
-	printf("List handle located at %08x\n",(int) list);
-	printf("last = %08x\n",(int) list->last);
-	printf("current = %08x\n",(int) list->current);
-	printf("data = %08x\n", (int) list->data);
+	printf("List handle located at %08lx\n",(unsigned long) list);
+	printf("last = %08lx\n",(unsigned long) list->last);
+	printf("current = %08lx\n",(unsigned long) list->current);
+	printf("data = %08lx\n", (unsigned long) list->data);
 	printf("nextOk = %d\n", list->nextOk);
 	printf("size = %d\n", list->size);
 	printf("changed = %d\n", list->changed);
@@ -44,9 +44,9 @@ void	*info;
 		this = list->last->next;
 		do
 		{
-			printf("Node at %08x:\n",(int) this);
-			printf("  next = %08x\n",(int) this->next);
-			printf("  prev = %08x\n",(int) this->prev);
+			printf("Node at %08lx:\n",(unsigned long) this);
+			printf("  next = %08lx\n",(unsigned long) this->next);
+			printf("  prev = %08lx\n",(unsigned long) this->prev);
 			if (key_dump != NULL)
 			{
 				key_dump(this->key,this->data,info);

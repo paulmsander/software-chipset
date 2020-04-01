@@ -177,7 +177,7 @@ RANLIB=true
 # the name of the library, the rest must be the names of the .o files
 # to be added.
 
-AR=ar r
+AR=ar -r
 #AR=$(CC) -G -o
 
 ################
@@ -207,8 +207,8 @@ NROFF=nroff -man | col -b -x
 # This compresses ASCII plaintext files for some systems.  COMPRESS must
 # be a filter.
 
-COMPRESS=compress
-ZSUFF=.Z
+COMPRESS=gzip -c
+ZSUFF=.gz
 #COMPRESS=/bin/cat
 #ZSUFF=
 

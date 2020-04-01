@@ -45,14 +45,14 @@ void	*info;
 	}
 	printf("%08lx: %d keys (keys %08lx, children %08lx, data %08lx),\n",
 	       (unsigned long) node, node->nkeys,(unsigned long) node->keys,(unsigned long) node->children,(unsigned long) node->data);
-	printf("currKey = %d, parent = %08x, tsize = %d\n",
-	       node->currKey,(int) node->parent,node->tsize);
+	printf("currKey = %d, parent = %08lx, tsize = %d\n",
+	       node->currKey,(unsigned long) node->parent,node->tsize);
 	printf("--------\n");
 	for (i = 0; i < node->nkeys; i++)
 	{
 		if (node->children != NULL)
 		{
-			printf("    %08x\n",(int)(node->children[i]));
+			printf("    %08lx\n",(unsigned long)(node->children[i]));
 		}
 		else
 		{
@@ -66,7 +66,7 @@ void	*info;
 	}
 	if (node->children != NULL)
 	{
-		printf("    %08x\n",(int)(node->children[i]));
+		printf("    %08lx\n",(unsigned long)(node->children[i]));
 		for (i = 0; i <= node->nkeys; i++)
 		{
 			bt_dumpNode(node->children[i],key_dump,info);
@@ -111,17 +111,17 @@ void	*info;
 	BTREE	tree;
 
 	tree = (BTREE) ptree;
-	printf("B-tree dump  %x:\n\n",(int)ptree);
+	printf("B-tree dump  %lx:\n\n",(unsigned long)ptree);
 	printf("order = %d\n",tree->order);
 	printf("capacity = %d\n",tree->capacity);
 	printf("contains %d keys\n",tree->root->tsize);
 	printf("efficiency is %d per cent\n",
 	       (tree->root->tsize*100)/tree->capacity);
-	printf("handle at %08x\n",(int)tree);
-	printf("root  = %08x\n",(int) tree->root);
-	printf("currNode  = %08x\n",(int) tree->currNode);
+	printf("handle at %08lx\n",(unsigned long)tree);
+	printf("root  = %08lx\n",(unsigned long) tree->root);
+	printf("currNode  = %08lx\n",(unsigned long) tree->currNode);
 	printf("nextOk = %d\n",tree->nextOk);
-	printf("data = %x\n",(int)(tree->data));
+	printf("data = %lx\n",(unsigned long)(tree->data));
 	printf("\n");
 	bt_dumpNode(tree->root,key_dump,info);
 	return;

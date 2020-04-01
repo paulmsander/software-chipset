@@ -452,7 +452,7 @@ void	*data;
 void	*info;
 #endif
 {
-	printf("  key = %4.4d (%08x)\n  data = ",*(int*)key,(int)key);
+	printf("  key = %4.4d (%08lx)\n  data = ",*(int*)key,(unsigned long)key);
 	if (data != NULL) printf("%4.4d\n",*(int*)data);
 	else printf("(NULL)\n");
 	return;

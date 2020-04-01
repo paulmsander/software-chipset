@@ -35,8 +35,7 @@ installDocs:	readln.man
 
 # This produces the library.  Should work for both System V and BSD
 $(TARGET): $(OBJECTS)
-	$(AR) $@ `lorder $(OBJECTS) | tsort`
-	$(RANLIB) $@
+	$(AR) $@ $(OBJECTS)
 
 # This produces the object code.
 $(OBJECTS): readln.h
