@@ -42,14 +42,28 @@ at paul@sander.cupertino.ca.us .
 
 VERSIONS:
 
-This is Software ChipSet release 1.4
+This is Software ChipSet release 1.4.1
 
 This distribution contains:
-- Build scaffolding 1.4
-- Btree 2.15
-- Dupkey 1.0
-- List 1.05
-- Readln 1.0
+- Build scaffolding 1.4.1
+- Btree 2.15.1
+- Dupkey 1.0.1
+- List 1.5.1
+- Readln 1.0.1
+
+CHANGES since version 1.4:
+
+- Compiled the library for the first time since 1995 and fixed bitrot.
+  Software ChipSet compiles and passes its test suite on the following
+  systems:
+
+>CentOS 8.1\
+>FreeBSD 12.1\
+>MacOSX 10.13.4\
+>OpenIndiana 2019.10\
+>Raspian 8\
+>Ubuntu 18.04.1
+
 
 CHANGES since version 1.3:
 - Added the dupkey component.
@@ -91,5 +105,5 @@ ACKNOWLEDGEMENTS:
 I'd like to thank the following people who have pointed out legitimate
 bugs in the code and made suggestions to improve it:
 
-Greg McFarlane
+>Greg McFarlane\
 George Velamparampil

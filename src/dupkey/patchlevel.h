@@ -9,7 +9,7 @@
  */
 
 #define dk_name "dupkey"
-#define dk_patchlevel "1.0"
+#define dk_patchlevel "1.0.1"
 
 /*** End of File ***/
 

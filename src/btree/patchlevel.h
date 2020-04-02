@@ -9,7 +9,7 @@
  */
 
 #define bt_name "btree"
-#define bt_patchlevel "2.15"
+#define bt_patchlevel "2.15.1"
 
 /*** End of File ***/
 

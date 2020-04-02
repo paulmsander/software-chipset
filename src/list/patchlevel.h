@@ -9,7 +9,7 @@
  */
 
 #define dll_name "dlist"
-#define dll_patchlevel "1.05"
+#define dll_patchlevel "1.5.1"
 
 /*** End of File ***/
 
