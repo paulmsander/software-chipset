@@ -179,6 +179,8 @@ RANLIB=true
 
 AR=ar -r
 #AR=$(CC) -G -o
+#AR=$(CC) -dylib -o
+#AR=$(CC) -shared -o
 
 ################
 
@@ -187,13 +189,16 @@ AR=ar -r
 
 LIBSUFF=a
 #LIBSUFF=so.1
+#LIBSUFF=.1.dylib
+
 ################
 
 # Set this appropriately to produce PostScript output.  Must be a filter.
 
 #PSROFF=psroff -t -man
-PSROFF=troff -Tpsc -man | psdit
+#PSROFF=troff -Tpsc -man | psdit
 #PSROFF=troff -Tpost -man
+PSROFF=groff -T ps -man
 
 ################
 
@@ -207,10 +212,10 @@ NROFF=nroff -man | col -b -x
 # This compresses ASCII plaintext files for some systems.  COMPRESS must
 # be a filter.
 
-COMPRESS=gzip -c
-ZSUFF=.gz
-#COMPRESS=/bin/cat
-#ZSUFF=
+#COMPRESS=gzip -c
+#ZSUFF=.gz
+COMPRESS=cat
+ZSUFF=
 
 ################
 

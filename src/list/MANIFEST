@@ -1,7 +1,6 @@
-README
-patchlevel.h
 MANIFEST
 Makefile
+README
 dldata.c
 dldelete.c
 dldelrank.c
@@ -34,4 +33,5 @@ dlsearch.c
 dlsetup.c
 dltrav.c
 dlutil.c
+patchlevel.h
 test.c

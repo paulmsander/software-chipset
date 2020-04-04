@@ -69,7 +69,12 @@ spotless clobber realclean veryclean: clean
 # Create the MANIFEST file
 
 MANIFEST: clobber
-	find . -type f -print | sed -e 's/^\.\///' -e /CVS/d | sort > MANIFEST
+	@set -x; \
+	find . -type f -print | \
+	sed -e 's/^\.\///' | \
+	sed -e /CVS/d | \
+	fgrep -v .git | \
+	LANG=C sort > $@
 
 # Instrument code for GCT coverage analysis
 

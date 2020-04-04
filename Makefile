@@ -314,8 +314,8 @@ spotless clobber realclean veryclean:
 
 MANIFEST: clobber
 	find . -type f -print |						\
-		sed -e 's/^\.\///' -e /CVS/d -e /header/d |		\
-		sort > MANIFEST
+		sed -e 's/^\.\///' -e /CVS/d -e /header/d -e '/\.git/d' |\
+		LANG=C sort > MANIFEST
 	for x in $(COMPONENTS);						\
 	do								\
 		echo Processing $$x;					\
