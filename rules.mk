@@ -5,86 +5,184 @@
 # The source code for Software Chipset has been released into the
 # public domain by its author, Paul Sander.
 
-# Default rule, just in case
+# Identify the tree roots.  These settings assume that the developer is
+# working in a single rooted workspace.  The top-level Makefile overrides
+# these when building the entire library, possibly in a multi-rooted
+# workspace.
 
-all:
+THISDIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
+BUILDROOT ?= $(THISDIR)
+SRCROOT ?= $(THISDIR)
 
-# Install the libraries in $(LIBDIR), which is passed on the command line
-# or set in common.mk
+include $(SRCROOT)/common.mk
 
-installLib:
-	for x in $?;							\
-	do								\
-		cp $$x $(LIBDIR);					\
-		$(RANLIB) $(LIBDIR)/$$x					\
-		chmod 644 $(LIBDIR)/$$x;				\
-	done
+# Main chipset library
 
-# Install the include files in $(INCDIR), which is passed on the command line
-# or set in common.mk
+LIBCHIPSET = $(LIBDIR)/libchipset.a
 
-installInclude:
-	for x in $?;							\
-	do								\
-		cp $$x $(INCDIR);					\
-		chmod 644 $(INCDIR)/$$x;				\
-	done
+# Default rule
 
-# Install the documentation
+.PHONY: all
+all: $(LIBCHIPSET)
 
-installDocs:
-	for x in $?;							\
-	do								\
-		dest=`expr $$x : '\(.*\)\.[^.]*'`.$(MANSUFF)$(INSTALLSUFF); \
-		< $$x $(INSTALLMAN) > $(MANDIR)/$$dest;			\
-		chmod 644 $(MANDIR)/$$dest;				\
-	done
+# Pattern rule to copy a header file from the source tree to the
+# include directory of the build tree.
 
-# Make all products locally
+$(INCDIR)/%.h: %.h
+	mkdir -p $(@D)
+	cp $< $@
+	chmod a+r $@
 
-everything: all docs
+# Pattern rule to compile a C source file and store the object file in
+# the obj directory of the build tree.
 
-# Install everything
+CFLAGS = -I$(INCDIR)
 
-install: installInclude installLib installDocs
+define MAKEDEP
+	$(CC) $(CFLAGS) -M -o - $< | \
+	sed -e '1s/:/:\\'$$'\\\n /' | \
+	( echo "# This Makefile applies in $(CURDIR)"; \
+	  echo '# $$(info Reading $(TESTDIR)/$(@F).d)'; \
+	  echo "$@: \\" ; \
+	  sed -e '1d' )
+endef
 
-# Clean-up
+$(OBJDIR)/%.o: %.c
+	mkdir -p $(@D) $(TESTDIR)
+	$(MAKEDEP) > $(TESTDIR)/$(@F).d
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-clean:
-	if [ -d gct_backup ];			\
-	then					\
-		grestore;			\
-		rmdir gct_backup || true;	\
-	fi
-	if [ -d gct_backup ];		\
-	then				\
-		mv gct_backup/* .;	\
-		rmdir gct_backup;	\
-	fi
-	rm -f *.o test core gct*.c gct*.h __gct-* gct-map gct-rscript gct-log
+$(TESTDIR)/%.o: %.c
+	mkdir -p $(@D)
+	$(MAKEDEP) > $@.d
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-spotless clobber realclean veryclean: clean
-	rm -f *.doc *.ps *.$(MANSUFF) *.$(LIBSUFF) conf.h
+# Override built-in pattern rule to compile test programs when
+# SRCROOT and BUILDROOT are the same directory.
 
-# Create the MANIFEST file
+%.o: %.c
+	mkdir -p $(@D)
+	$(MAKEDEP) > $@.d
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-MANIFEST: clobber
-	@set -x; \
-	find . -type f -print | \
-	sed -e 's/^\.\///' | \
-	sed -e /CVS/d | \
-	fgrep -v .git | \
-	LANG=C sort > $@
+sinclude $(wildcard $(TESTDIR)/*.d)
 
-# Instrument code for GCT coverage analysis
+# Pattern rule to create an archive library from a list of object files.
 
-gct:
-	gct-init;
-	$(MAKE) objects "CC=gct $(INCLUDES)"
-	$(CC) -c gct-ps-defs.c
-	$(CC) -c gct-write.c
-	$(MAKE) test.o "CFLAGS=$(CFLAGS) -DGCT"
-	$(MAKE) all "GCTSTUFF=gct-ps-defs.o gct-write.o"
-	grestore
+$(LIBDIR)/%.a:
+	mkdir -p $(@D)
+	$(AR) r $@ $^
+	chmod a+r $@
 
-### End of File ###
+# Pattern rule to link an executable.
+
+LD = $(CC)
+LFLAGS = -L$(LIBDIR)
+
+$(BINDIR)/%: $(OBJDIR)/%.o
+	mkdir -p $(@D)
+	$(LD) $(LFLAGS) -o $@ $^
+
+# Pattern rule to link unit tests.
+
+$(TESTDIR)/%: $(TESTDIR)/%.o
+	mkdir -p $(@D)
+	$(LD) $(LFLAGS) -o $@ $^
+
+# Pattern rule to copy man pages.
+
+$(MANDIR)/%.$(MANSECT): %.man
+	mkdir -p $(@D)
+	cp $< $@
+	chmod a+r $@
+
+# Rule to clean the build area.
+
+.PHONY: clean
+clean::
+	rm -rf $(BINDIR) $(INCDIR) $(LIBDIR) $(OBJDIR) $(SHAREDIR)
+
+ifneq ($(realpath $(BUILDROOT)),$(realpath $(SRCROOT)))
+clean::
+	: rm -rf $(BUILDROOT)/src
+endif
+
+## Install the libraries in $(LIBDIR), which is passed on the command line
+## or set in common.mk
+#
+#installLib:
+#	for x in $?;							\
+#	do								\
+#		cp $$x $(LIBDIR);					\
+#		$(RANLIB) $(LIBDIR)/$$x					\
+#		chmod 644 $(LIBDIR)/$$x;				\
+#	done
+#
+## Install the include files in $(INCDIR), which is passed on the command line
+## or set in common.mk
+#
+#installInclude:
+#	for x in $?;							\
+#	do								\
+#		cp $$x $(INCDIR);					\
+#		chmod 644 $(INCDIR)/$$x;				\
+#	done
+#
+## Install the documentation
+#
+#installDocs:
+#	for x in $?;							\
+#	do								\
+#		dest=`expr $$x : '\(.*\)\.[^.]*'`.$(MANSUFF)$(INSTALLSUFF); \
+#		< $$x $(INSTALLMAN) > $(MANDIR)/$$dest;			\
+#		chmod 644 $(MANDIR)/$$dest;				\
+#	done
+#
+## Make all products locally
+#
+#everything: all docs
+#
+## Install everything
+#
+#install: installInclude installLib installDocs
+#
+## Clean-up
+#
+#clean:
+#	if [ -d gct_backup ];			\
+#	then					\
+#		grestore;			\
+#		rmdir gct_backup || true;	\
+#	fi
+#	if [ -d gct_backup ];		\
+#	then				\
+#		mv gct_backup/* .;	\
+#		rmdir gct_backup;	\
+#	fi
+#	rm -f *.o test core gct*.c gct*.h __gct-* gct-map gct-rscript gct-log
+#
+#spotless clobber realclean veryclean: clean
+#	rm -f *.doc *.ps *.$(MANSUFF) *.$(LIBSUFF) conf.h
+#
+## Create the MANIFEST file
+#
+#MANIFEST: clobber
+#	@set -x; \
+#	find . -type f -print | \
+#	sed -e 's/^\.\///' | \
+#	sed -e /CVS/d | \
+#	fgrep -v .git | \
+#	LANG=C sort > $@
+#
+## Instrument code for GCT coverage analysis
+#
+#gct:
+#	gct-init;
+#	$(MAKE) objects "CC=gct $(INCLUDES)"
+#	$(CC) -c gct-ps-defs.c
+#	$(CC) -c gct-write.c
+#	$(MAKE) test.o "CFLAGS=$(CFLAGS) -DGCT"
+#	$(MAKE) all "GCTSTUFF=gct-ps-defs.o gct-write.o"
+#	grestore
+#
+#### End of File ###
