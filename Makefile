@@ -39,7 +39,8 @@ all clean docs includes libs:
 	for c in $(COMPONENTS); do \
 		( set -ex; \
 		  $(MAKE) -w -C $(SRCROOT)/src/$$c $@ \
-		          SRCROOT=$(SRCROOT) BUILDROOT=$(BUILDROOT); \
+		          SRCROOT=$(SRCROOT) \
+		          BUILDROOT=$(abspath $(BUILDROOT)); \
 		); \
 	done; \
 
@@ -51,22 +52,25 @@ test:
 	for c in $(COMPONENTS); do \
 		( set -ex; \
 		  $(MAKE) -w -C $(SRCROOT)/src/$$c $@ \
-		          SRCROOT=$(SRCROOT) BUILDROOT=$(BUILDROOT); \
+		          SRCROOT=$(SRCROOT) \
+		          BUILDROOT=$(abspath $(BUILDROOT)); \
 		) || pass=0; \
 	done; \
 	test $$pass -ne 0 && echo "ALL TESTS PASSED" || \
 	{ echo "SOME TESTS FAILED"; exit 2; }
 
 # Install the component library, headers, and documentation.
+# This deliberately overwrites whatever has been installed before,
+# without checking timestamps.
 
 .PHONY: install
-install:
+install: all
 	@set -ex; \
 	umask 022; \
 	mkdir -p $(PREFIX)/lib; \
-	cp lib/libchipset.a $(PREFIX)/lib; \
-	cp -R include $(PREFIX)/include; \
-	cp -R share $(PREFIX)/shared
+	cp $(BUILDROOT)/lib/libchipset.a $(PREFIX)/lib; \
+	cp -R $(BUILDROOT)/include $(PREFIX); \
+	cp -R $(BUILDROOT)/share $(PREFIX)
 
 #
 #include common.mk
