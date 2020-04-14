@@ -8,7 +8,7 @@
 /* public domain by its author, Paul Sander.                         */
 
 #define name "installTools"
-#define patchlevel "1.5.0"
+#define patchlevel "1.5.1"
 
 /*** End of File ***/
 

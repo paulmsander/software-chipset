@@ -51,6 +51,10 @@ This distribution contains:
 - List 1.5.1
 - Readln 1.0.1
 
+CHANGES since version 1.5.0:
+
+- Removed obsolete MANIFEST files.
+
 CHANGES since version 1.4.1:
 
 - Modernized the Makefile system and improved its correctness.
