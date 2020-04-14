@@ -16,7 +16,7 @@ all:
 # Identify the read-only source tree, the writable build tree, and the
 # directory of the final installation.
 
-THISDIR = $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
+THISDIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 SRCROOT ?= $(THISDIR)
 BUILDROOT ?= $(realpath $(CURDIR))
 PREFIX ?= /usr/local
@@ -33,8 +33,7 @@ COMPONENTS = btree list dupkey readln
 
 # Build the standard targets recursively.
 
-.PHONY: all clean docs includes libs
-all clean docs includes libs:
+define RECURSE
 	@set -ex; \
 	for c in $(COMPONENTS); do \
 		( set -ex; \
@@ -42,7 +41,18 @@ all clean docs includes libs:
 		          SRCROOT=$(SRCROOT) \
 		          BUILDROOT=$(abspath $(BUILDROOT)); \
 		); \
-	done; \
+	done;
+endef
+
+.PHONY: all clean docs includes libs
+all docs includes libs:
+	$(RECURSE)
+
+clean::
+	$(RECURSE)
+
+.PHONY: spotless clobber realclean veryclean
+spotless clobber realclean veryclean: clean
 
 # Run the unit tests and report result.
 
@@ -71,6 +81,24 @@ install: all
 	cp $(BUILDROOT)/lib/libchipset.a $(PREFIX)/lib; \
 	cp -R $(BUILDROOT)/include $(PREFIX); \
 	cp -R $(BUILDROOT)/share $(PREFIX)
+
+# Create a tarball for packaging or distribution.
+
+%.tgz: clean
+	mkdir -p $(@D)
+	( cd $(SRCROOT) && \
+	  find . -print | \
+	  sed -e '/\/\.git/d' -e '/\/CVS/d' | \
+	  cpio -o -H ustar -R 0:0 -v ) | \
+	gzip > $@
+
+TARBALL = $(BUILDROOT)/chipset.tgz
+
+.PHONY: tar
+tar: $(TARBALL)
+clean::
+	rm -f $(TARBALL)
+
 
 #
 #include common.mk

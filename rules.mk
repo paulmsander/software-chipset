@@ -107,6 +107,9 @@ clean::
 	: rm -rf $(BUILDROOT)/src
 endif
 
+.PHONY: spotless clobber realclean veryclean
+spotless clobber realclean veryclean: clean
+
 ## Install the libraries in $(LIBDIR), which is passed on the command line
 ## or set in common.mk
 #
