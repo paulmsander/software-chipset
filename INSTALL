@@ -1,7 +1,7 @@
                                 - INTRODUCTION -
 
 This directory is the root directory for the Software ChipSet, a collection
-of reusable software components.  See the file named "ChipSet" in this
+of reusable software components.  See the file named "README.md" in this
 directory for additional information regarding the Software ChipSet's goals
 and capabilities.
 
@@ -9,10 +9,12 @@ The src directory contains additional directories containing source code for
 each of the components.  Each component has its own "README" file to describe
 its capabilities and limitations.
 
-The Makefile installs the components into a staging area that is specified
-as a configuration option, and then installs the result into the system's
-install area (e.g. /usr/local).  Please see the file named "BUILD" in this
-directory for a detailed description of the build scaffolding.
+The Makefile supports a multi-root build system such that the software can
+be compiled in-place in the source tree, or derived files can be stored in
+a different directory tree.  The installation then copies the final products
+from the build tree to the system's install area, which is the /usr/local
+tree by default.  Please see the file named "BUILD" in this directory for a
+detailed description of the build scaffolding.
 
 
                            - UNPACKING INSTRUCTIONS -
@@ -21,116 +23,155 @@ The Software ChipSet is distributed in a number of ways.  Following are
 the unpacking instructions for each of the distribution media on Unix
 systems.
 
--- SHAR --
+The build instructions below reference the directory that is the top of
+the source tree.  The location of that directory depends on the method
+used to obtain the source code.  In the following instructions, the
+fullpath to that directory will be stored in a shell variable named
+SRCROOT for easy reference as you progress to the build instructions.
 
-Software ChipSet is distributed in several numbered shell archive files that
-unpack themselves when executed by the Bourne Shell.  The naming convention
-for the archives is "ChipSet.partxx" where "xx" is a two-digit number pad-
-ded with leading zeros.  To unpack the archives, follow these steps:
+-- GIT --
 
-1.  Edit each file to verify that the first line contains the text
-    "#! /bin/sh", removing anything preceding that line if necessary.
-    If this line is missing, then the archive file is corrupt and must
-    be replaced.
-2.  Verify that each file contains a line with the text "exit 0".  This
-    should be near the end of the archive.  If this line is missing, then
-    the archive is corrupt and must be replaced.
-3.  Invoke the archives as Bourne Shell scripts.  This can be done by
-    invoking the following command sequence in the C Shell:
+Software ChipSet can be downloaded from Github using the following command
+in an empty directory:
 
-	foreach x ( `/bin/ls ChipSet.part* | /bin/sort` )
-	echo Unpacking $x
-	sh $x
-	end
+	git clone https://github.com/paulmsander/software-chipset.git
 
-    To unpack the archive files using the Bourne or Korn shells, invoke
-    the following command sequence:
+If you have an account on Github, you can use this command instead:
 
-	for x in `/bin/ls ChipSet.part* | /bin/sort`
-	do
-	echo Unpacking $x
-	sh $x
-	done
+	git clone git@github.com:paulmsander/software-chipset.git
 
+When obtaining Software ChipSet using Git, the top of the source tree
+is the software-chipset directory created by the "git clone" command.
 
--- CPIO --
+Save the fullpath of the root of the source tree in a shell variable
+for easy reference later:
 
-Software ChipSet is distributed in portable cpio archive files, which may
-have been compressed.  The name of the archive is ChipSet.cpio or
-ChipSet.cpio.gz by convention.  An archive named ChipSet.cpio can be unpacked
-by invoking the following command:
-
-	cpio -icdv < ChipSet.cpio
-
-An archive named ChipSet.cpio.gz can be unpacked by invoking the following
-command:
-
-	gzip -cd ChipSet.cpio.gz | cpio -icdv
-
+	SRCROOT=$PWD/software-chipset
 
 -- TAR --
 
-Software ChipSet is distributed in "tar" archives, which may have been
-compressed.  The name of the archive is ChipSet.tar or ChipSet.tar.gz by
-convention.  An archive named ChipSet.tar can be unpacked by invoking the
-following command:
+Software ChipSet is distributed in "tar" archives created by its own
+Makefile system, which are compressed using gzip.  Store the chipset.tgz
+file in an empty directory and run this command.
 
-	tar xvfo ChipSet.tar
+	gzip -cd chipset.tgz | tar xvfo -
 
-An archive named ChipSet.tar.gz can be unpacked by invoking the following
-command:
+When obtaining Software ChipSet from a tar archive in this way, the
+present working directory becomes the top of the source tree.
 
-	gzip -cd ChipSet.tar.gz | tar xvfo -
+Save the fullpath of the root of the source tree in a shell variable
+for easy reference later:
 
+	SRCROOT=$PWD
 
 -- ZIP --
 
-Software ChipSet is distributed in "zip" archives.  The name of the archive
-is ChipSet.zip by convention.  To unpack the archive, invoke the following
-command:
+Software ChipSet is distributed by Github in "zip" archives.  You can download
+a zip file from this URL:
 
-	unzip ChipSet.zip
+	https://github.com/paulmsander/software-chipset/archive/master.zip
+
+Copy the downloaded file to an empty directory and run this command (which
+may be done automatically on some systems):
+
+	unzip master.zip
+
+When obtaining Software ChipSet in a zip archive from Github, the top of the
+source tree is the software-chipset-master directory under which the zip
+archive was unzipped.
+
+Save the fullpath of the root of the source tree in a shell variable
+for easy reference later:
+
+	SRCROOT=$PWD/software-chipset-master
 
 
 
                              - BUILD INSTRUCTIONS -
 
-After unpacking the distribution archives, you may wish to verify the
-installation.  To do this, invoke the following command:
+Make sure that Gnu Make is installed on your system.  It is the native
+build tool provided an most Linux systems.  On other Unix-based systems
+such as FreeBSD and OpenIndiana, it must be installed as an after-market
+package.  On those systems, you must invoke it as "gmake" rather than "make".
 
-	make verify
+Store the fullpath of the top of the source tree in a shell variable.
+The top of the source tree is described in the unpacking instructions above.
+Set the variable SRCROOT to the fullpath of that directory for easy reference
+later in this procedure.  Then cd to that directory.
 
-This will verify that all of the source files required to build the Software
-ChipSet are present.
+Configure the build procedures in this directory as needed for your system.
+The common.mk file may need changes, as it is used by all of the makefiles
+included with the Software ChipSet.
 
-Next, you must configure the build procedures in this directory as needed for
-your system.  The common.mk file will need changes, as it is used all of the
-makefiles included with the Software ChipSet.  Each of the configurable macros
-and rules are clearly documented there, with suggestions for how to change
-them.
+The makefile system supports three modes of operation:
 
-You must create the directory pointed to by the STAGE macro in the common.mk
-file.  If the STAGEINC, STAGELIB, STAGEMAN, STAGETMP, or STAGEINST macros
-were changed from their default values, it would be a good idea to create
-those directories as well.
+1.  Derived files are stored in the source tree.
+2.  Derived files are stored outside the source tree in a build tree, but the
+    build is initiated from the source tree.
+3.  Derived files are stored outside the source tree in a build tree, and the
+    build is initiated from the build tree.
 
-Next, do a "make all" to build the components and install them in a staging
-area where additional testing and inspection can be done if desired.
+Method 1:
 
-Each of the components has a test program.  These can be run by doing
-a "make test" in this directory.  This builds all of the test cases and
-runs them, and gives a pass/fail indication for each test and for the
-entire suite.  Output from each test is appended to the file test.out
-in the tmp directory of the staging area.  Each test program is
-also self-contained, and may be run in the directory in which it resides.
+To run the build in the source tree, perform this procedure:
 
-Perform a "make -n install" to verify the steps that will be taken by the
-installation process.  If they are correct for your system, perform a
-"make install".  This may require super-user access due to file permissions.
-This step places the library, public header files, and documentation in
-the appropriate place on a live system for general use.
+	cd $SRCROOT
+	make all
+
+Method 2:
+
+To have the build store derived files in a build tree, identify a directory
+in which to store the files.  Set a shell variable named BUILDROOT to the
+fullpath of that directory.
+
+Initate the build from the source tree using this procedure:
+
+	cd $SRCROOT
+	make BUILDROOT=$BUILDROOT all
+
+Method 3:
+
+To have the build store derived files in a build tree, identify a directory
+in which to store the files.  Set a shell variable named BUILDROOT to the
+fullpath of that directory.
+
+Initate the build from the build tree using this procedure:
+
+	mkdir -p $BUILDROOT
+	cd $BUILDROOT
+	make -f $SRCROOT/Makefile all
+
+NOTE:  On systems that don't supply Gnu Make as the native build tool
+(e.g. FreeBSD or OpenIndiana), it must be installed from an after-market
+package.  Once installed, it must be invoked using the "gmake" command
+rather than "make" in the above procedures.
+
+NOTE:  On systems that don't have a native C compiler (e.g. OpenIndiana),
+you must install Gnu CC from an after-market package.  Once it is installed,
+add the following macro definition to any of the "make" command lines
+above:  CC=gcc
+
+Each of the components has a test program.  These can be run by building
+the "test" target (rather than the "all" target) in any of the above
+"make" commands.  This builds all of the test cases and runs them, and
+gives a pass/fail indication for each test and for the entire suite.
+
+To test the installation of Software ChipSet, use any of the above methods
+to build the "install" target (rather than the "all" target), and adding the
+-n option to prevent actual changes to the system.  Review Make's output
+to confirm that the archive file, headers, and man pages are all installed
+in their proper locations.  (The /usr/local tree is the usual location.)
+If this is incorrect, edit the common.mk file to set the correct locations
+and repeat the test.  When the locations are correct, omit the -n option
+from the Make command line to copy the files to their final destinations.
+This may require super-user access (via su or sudo, for example) due to
+filesystem permissions.
 
 After installing the components, you may clean up the occupied disk space
-by doing a "make clean" or "make clobber".  Making "clean" removes all of
-the derived files except for the final product.  Making "clobber" cleans all
-of the derived files, including the final product.
+by using any of the above methods to build the "clean" target rather than
+the "all" target.  When using Methods 2 or 3, the build tree's empty
+directory structure is left behind and can be removed using this procedure:
+
+	cd $SRCROOT
+	rm -rf $BUILDROOT
+

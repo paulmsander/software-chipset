@@ -27,8 +27,8 @@ for others should the programmer find that to be desirable.
 
 The components are designed to be portable across Unix platforms, but many
 will port to other platforms easily.  The target audience is rather ambitious:
-All platforms that support the standard Unix utilities, support a "void"
-type, and have a "make" tool that is at least as capable as SVR2's.
+All platforms that support the standard Unix utilities, an have a standard
+C compiler and have Gnu Make installed.
 
 Components available include:
 btree - In-memory B-tree implementation
@@ -38,18 +38,30 @@ list - In-memory doubly-linked list
 readln - "Safe" text line input, supporting lines of arbitrary length
 
 Please send bug reports and other comments to Paul Sander via Internet mail
-at paul@sander.cupertino.ca.us .
+at paul@wakawaka.com
 
 VERSIONS:
 
-This is Software ChipSet release 1.4.1
+This is Software ChipSet release 1.5.0
 
 This distribution contains:
-- Build scaffolding 1.4.1
+- Build scaffolding 1.5.0
 - Btree 2.15.1
 - Dupkey 1.0.1
 - List 1.5.1
 - Readln 1.0.1
+
+CHANGES since version 1.4.1:
+
+- Modernized the Makefile system and improved its correctness.
+- Removed support for older Make programs.  Gnu Make is now a requirement.
+- Multi-rooted builds are now supported, replacing the staging directory.
+- Removed all packaging methods except for tar.
+- Removed support for GCT coverage analysis.
+- Man page pre-formatting was removed.
+- Removed manifest creation and verification.
+- Rewrote the README.md, BUILD, and INSTALL files.
+- Removed the old README file that was replaced by the README.md file.
 
 CHANGES since version 1.4:
 
