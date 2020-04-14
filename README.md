@@ -42,10 +42,10 @@ at paul@wakawaka.com
 
 VERSIONS:
 
-This is Software ChipSet release 1.5.0
+This is Software ChipSet release 1.5.1
 
 This distribution contains:
-- Build scaffolding 1.5.0
+- Build scaffolding 1.5.1
 - Btree 2.15.1
 - Dupkey 1.0.1
 - List 1.5.1
